@@ -1,0 +1,20 @@
+[phases.setup]
+nixPkgs = ["python311", "postgresql", "bash"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[phases.build]
+cmds = [
+    "echo 'Build phase starting...'",
+    "ls -la",
+    "chmod +x start.sh",
+    "ls -la start.sh",
+    "echo 'Build completed'"
+]
+
+[start]
+cmd = "bash start.sh"
+
+[variables]
+PYTHONPATH = "/app"

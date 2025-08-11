@@ -1,0 +1,48 @@
+# Frontend files (we're only deploying backend)
+frontend/
+*.bat
+# Keep start.sh for Railway deployment
+# *.sh
+
+# Development files
+test_*.py
+check_*.py
+setup_local_db.sql
+database/
+LOCAL_SETUP.md
+
+# Git and cache files
+.git/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git/
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db

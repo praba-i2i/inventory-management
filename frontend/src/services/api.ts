@@ -10,14 +10,80 @@ import {
   StockAlert, StockAlertCreate, StockAlertUpdate
 } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// Force HTTPS in production to avoid mixed content issues
+const getApiBaseUrl = () => {
+  // If environment variable is set, use it
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // In production, always use HTTPS
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://inventory-management-production-82d5.up.railway.app';
+  }
+  
+  // In development, use localhost
+  return 'http://localhost:8000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+console.log('API Base URL:', API_BASE_URL);
+console.log('Environment:', process.env.NODE_ENV);
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
   },
+  // Handle redirects automatically
+  maxRedirects: 5,
+  // Force HTTPS in production
+  timeout: 10000,
 });
+
+// Add request interceptor to log requests and ensure HTTPS
+api.interceptors.request.use(request => {
+  // Log all requests for debugging
+  console.log('API Request:', request.method?.toUpperCase(), request.url);
+  console.log('Full URL:', (request.baseURL || '') + (request.url || ''));
+  
+  // Ensure HTTPS in production
+  if (process.env.NODE_ENV === 'production' && request.url && !request.url.startsWith('https://')) {
+    console.warn('Non-HTTPS request detected in production:', request.url);
+  }
+  
+  return request;
+});
+
+// Add response interceptor to handle errors
+api.interceptors.response.use(
+  response => {
+    console.log('API Response:', response.status, response.config?.url);
+    return response;
+  },
+  error => {
+    console.error('API Error:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      url: error.config?.url,
+      message: error.message,
+      data: error.response?.data
+    });
+    
+    // Handle mixed content errors specifically
+    if (error.message && error.message.includes('mixed-content')) {
+      console.error('Mixed Content Error: Frontend must be served over HTTPS to make HTTPS API calls');
+    }
+    
+    // Handle redirect errors
+    if (error.response?.status === 307) {
+      console.error('Redirect Error: API is redirecting. Check if using correct protocol (HTTPS)');
+    }
+    
+    return Promise.reject(error);
+  }
+);
 
 // Items API
 export const itemsApi = {
